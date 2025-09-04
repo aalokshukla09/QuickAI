@@ -1,13 +1,40 @@
 import React from 'react'
 import { Sparkles, Eraser } from 'lucide-react'
 import { useState } from 'react';
+import { useAuth } from '@clerk/clerk-react'
+import axios from 'axios'
+import { toast } from 'react-hot-toast'
+
+
+axios.defaults.baseURL = import.meta.env.VITE_BASE_URL
 
 export const RemoveBackground = () => {
 
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('')
+  const [loading, setloading] = useState(false)
+  const [content, setContent] = useState('')
+  const {getToken} = useAuth()
 
   const onsubmitHandler = async (e) => {
     e.preventDefault();
+    
+    try {
+      setloading(true)
+      const formData = new FormData()
+      formData.append('image', input)
+
+      const { data } = await axios.post('/api/ai/remove-image-background', formData, {
+        headers: { Authorization: `Bearer ${await getToken()}` }
+      })
+      if (data.success) { 
+        setContent(data.content) 
+      }else { 
+        toast.error(data.message) 
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
+    setloading(false)
   }
 
   return (
@@ -30,9 +57,13 @@ export const RemoveBackground = () => {
           Supports PNG,JPG nad other formats
         </p>
 
-        <button className='w-full flex justify-center items-center gap-2 bg-gradient-to-r
+        <button disabled={loading} className='w-full flex justify-center items-center gap-2 bg-gradient-to-r
          from-[#F6AB41] to-[#FF4938] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer'>
-          <Eraser className='w-5' />Remove background</button>
+          {
+              loading ? <span className='w-4 h-4 my-1 rounded-full border-2 border-t-transparent animate-spin'></span>
+               : <Eraser className='w-5'/>
+          }
+          Remove background</button>
 
 
       </form>
@@ -44,14 +75,18 @@ export const RemoveBackground = () => {
           <h1 className='text-xl font-semibold' >Processed Image</h1>
         </div>
 
-        <div className='flex-1 flex justify-center items-center'>
-          <div className='text-sm flex flex-col items-center gap-5
-           text-gray-400'>
-            <Eraser className='w-9 h-9' />
-            
-            <p>Choose an image and click "Remove Background" to get started</p>
-          </div>
-        </div>
+        {
+            !content ? (
+              <div className='flex-1 flex justify-center items-center'>
+              <div className='text-sm flex flex-col items-center gap-5 text-gray-400'>
+                {loading ? <span className='w-4 h-4 my-1 rounded-full border-2 border-t-transparent animate-spin'></span> : <Eraser className='w-10 h-10'/>}
+                <p hidden={loading} className='text-sm'>Upload the image and click "Remove background" to generate the image</p>
+              </div>
+            </div>
+            ) : (
+              <img src={content} alt="image" className=' mt-3 w-full h-full' />
+            )
+          }
         
         
       </div>

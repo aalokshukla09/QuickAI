@@ -1,18 +1,42 @@
 import React from 'react'
-import { dummyCreationData } from '../assets/assets'
+// import { dummyCreationData } from '../assets/assets'
 import CreationItem from '../components/CreationItem'
 import { Sparkle, Gem } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Protect } from '@clerk/clerk-react'
+import { Protect, useAuth } from '@clerk/clerk-react'
+import axios from 'axios'
+import { toast } from 'react-hot-toast'
 
+
+axios.defaults.baseURL = import.meta.env.VITE_BASE_URL
 
 export const DashBoard = () => {
 
   const [creations, setCreations] = useState([])
+  const [loading, setLoading] = useState(true);
+
+  const { getToken } = useAuth();
 
   const getdashboardData = async () => {
-    setCreations(dummyCreationData)
+    try {
+      const { data } = await axios.get("/api/user/get-user-creation", {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`,
+        },
+      });
+
+      if (data.success) {
+        setCreations(data.creations);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+    setLoading(false);
   }
+
+
   useEffect(() => {
     getdashboardData()
   }, [])
@@ -47,20 +71,18 @@ export const DashBoard = () => {
       </div>
 
       {/* Recent Creations */}
-         <div className='space-y-3'>
-        <p className='mt-6 mb-4'>Recent Creations</p>
-        {
-          creations.map((item) => (
+        {loading ? (
+        <div className="flex justify-center items-center h-3/4">
+          <span className="w-11 h-11 my-1 rounded-full border-3 border-purple-500 border-t-transparent animate-spin"></span>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <p className="mt-6 mb-4">Recent Creations</p>
+          {creations.map((item) => (
             <CreationItem key={item.id} item={item} />
-          ))
-
-        }
-
-
-      </div>
-        
-
-
+          ))}
+        </div>
+      )}
      
     </div>
   )

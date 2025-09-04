@@ -119,7 +119,7 @@ export const generateImage = async (req, res) => {
 
         const { data } = await axios.post('https://clipdrop-api.co/text-to-image/v1', formData, {
             headers: {
-                'x-api-key': process.env.CLIPDROP_API_KEY
+                'x-api-key': process.env.CLIPDROP_API_KEY // TEXT-TO-IMAGE API KEY
             },
             responseType: 'arraybuffer',
 
@@ -153,7 +153,7 @@ export const removeBackgroundImage = async (req, res) => {
         }
 
         // Upload directly from file path
-        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+        const uploadResult = await cloudinary.uploader.upload(image.path, {
             resource_type: "image",
             transformation: [
                 {

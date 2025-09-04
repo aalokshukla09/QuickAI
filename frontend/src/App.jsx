@@ -12,17 +12,17 @@ import { RemoveBackground } from './pages/RemoveBackground'
 import { Community } from './pages/Community'
 import { DashBoard } from './pages/Dashboard'
 import { Toaster } from 'react-hot-toast'
-import { useAuth } from '@clerk/clerk-react'
-import { useEffect } from 'react'
+// import { useAuth } from '@clerk/clerk-react'
+// import { useEffect } from 'react'
 
 function App() {
 
-   const {getToken}=useAuth()
-   useEffect(()=>{
-     getToken().then((token)=>{
-       console.log(token)
-     })
-    },[])
+  //  const {getToken}=useAuth()
+  //  useEffect(()=>{
+  //    getToken().then((token)=>{
+  //      console.log(token)
+  //    })
+  //   },[])
 
   return (
     <div>
